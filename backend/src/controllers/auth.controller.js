@@ -2,6 +2,7 @@ import AuthServices from "../services/auth.service.js";
 
 class AuthController {
   static async login(req, res, next) {
+    // console.log("Login controller hit");
     try {
       const res_obj = await AuthServices.loginUser(req, res);
       const options = {
@@ -19,14 +20,16 @@ class AuthController {
           data: res_obj.data,
         });
     } catch (err) {
-      return res.status(401).json({
+      const status = err.statusCode || err.status || 401;
+      return res.status(status).json({
         success: false,
-        message: error.message || "Login failed",
+        message: err.message || "Login failed",
       });
     }
   }
 
   static async register(req, res) {
+    console.log("register controller hit");
     try {
       const res_obj = await AuthServices.registerUser({
         body: req.body,

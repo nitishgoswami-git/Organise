@@ -1,17 +1,26 @@
-import app from "./src/app.js";
-import connectDB from "./src/config/db.js";
-import dotenv from "dotenv";
-
+import express from 'express';
+import indexRouter from './routes/index.js';
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import dotenv from 'dotenv';
 dotenv.config();
+//
+
+const app = express();
+console.log("CORS_ORIGIN:", process.env.CORS_ORIGIN);
+// Middleware
+app.use(cors({
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+}));
 
 
-connectDB()
-    .then(() => {
-        const PORT = process.env.PORT || 8000;
-        app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
-    })
-    .catch((err) => {
-        console.log(err);
-    });
+app.use(cookieParser());
+app.use(express.json({ limit: "16kb" }));
+app.use(express.urlencoded({ extended: true, limit: "16kb" }));
+app.use(express.static("public"));
+
+
+app.use('/api/v1', indexRouter);
+
+export default app;
