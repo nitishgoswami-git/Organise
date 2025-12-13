@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import jwt from "jsonwebtoken";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
-class authServices {
+class AuthServices {
   static generateTokens = async (userId) => {
     try {
       const user = await User.findOne({ _id: userId });
@@ -22,61 +22,69 @@ class authServices {
   };
 
   static registerUser = async ({ body, file }) => {
-    const { fullname, email, password } = body;
+    const { FirstName, LastName, Email, Password } = body;
 
-    if (!fullname || !email || !password) {
+    if (!FirstName || !LastName || !Email || !Password) {
       throw new ApiError(400, "All fields are required");
     }
 
-    const userExists = await User.findOne({ email: email.toLowerCase() });
-    if (userExists) throw new ApiError(400, "User already exists");
+    const userExists = await User.findOne({
+      Email: Email.toLowerCase(),
+    });
+
+    if (userExists) {
+      throw new ApiError(400, "User already exists");
+    }
 
     try {
-      let avatarURL = "";
+      let photoURL = "";
 
       if (file?.path) {
         const uploadResult = await uploadOnCloudinary(file.path);
-        avatarURL = uploadResult.secure_url || uploadResult.url;
+        photoURL = uploadResult.secure_url || uploadResult.url;
       }
 
       const newUser = await User.create({
-        fullname,
-        email: email.toLowerCase(),
-        password,
-        avatar: avatarURL,
+        FirstName,
+        LastName,
+        Email: Email.toLowerCase(),
+        Password,
+        photo: photoURL,
       });
 
-      const { AccessToken, RefreshToken } = await this.generateTokens(
-        newUser._id
-      );
+      const AccessToken = newUser.generateAccessToken();
+      const RefreshToken = newUser.generateRefreshToken();
 
       newUser.refreshToken = RefreshToken;
+      newUser.accessToken = AccessToken;
       await newUser.save({ validateBeforeSave: false });
 
       const userData = await User.findById(newUser._id).select(
-        "-password -refreshToken"
+        "-Password -refreshToken"
       );
 
       return {
         msg: "User registered successfully",
         data: userData,
         AccessToken,
-        RefreshToken,
       };
     } catch (e) {
-      console.log("REGISTER SERVICE ERROR:", e);
-      throw new ApiError(500, "Something went wrong", e);
+      console.error("REGISTER SERVICE ERROR:", e);
+      throw new ApiError(500, "Something went wrong");
     }
   };
 
   static loginUser = async (req, res) => {
+    // console.log("login service hit");
+
     const { email, password } = req?.body;
+    // console.log(email, password);
 
     if (!email || !password) {
       throw new ApiError(400, "All fields are required");
     }
 
-    const userFound = await User.findOne({ email: email.toLowerCase() });
+    const userFound = await User.findOne({ Email: email.toLowerCase() });
     if (!userFound) {
       throw new ApiError(400, "User not found");
     }
@@ -85,6 +93,10 @@ class authServices {
     if (!isPasswdCorrect) {
       throw new ApiError(400, "Incorrect password");
     }
+    // console.log("Login service hit");
+    // console.log("Email:", email, "Password:", password);
+    // console.log("User found:", userFound);
+    // console.log("Password match:", isPasswdCorrect);
 
     const { AccessToken, RefreshToken } = await this.generateTokens(
       userFound._id
@@ -98,7 +110,6 @@ class authServices {
       msg: "Login successful",
       data: loggedInUser,
       AccessToken,
-      RefreshToken,
     };
   };
 
@@ -152,4 +163,4 @@ class authServices {
   }
 }
 
-export default authServices;
+export default AuthServices;
