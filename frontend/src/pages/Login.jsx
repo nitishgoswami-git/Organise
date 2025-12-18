@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/auth.store";
+import { authApi } from "../api/auth/index";
 
 const LoginPage = () => {
   const { setUser } = useAuthStore();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false); // loading state
 
   const {
     register,
@@ -15,27 +16,15 @@ const LoginPage = () => {
   } = useForm();
 
   const onSubmit = async (data) => {
-    console.log("Login Data:", data);
-    // send to backend using axios/fetch
+    setIsLoading(true);
     try {
-      const res = await axios.post(
-        "http://localhost:8000/api/v1/auth/login",
-        {
-          email: data.Email,
-          password: data.Password,
-        },
-        {
-          withCredentials: true, // if backend sets JWT cookies
-        }
-      );
-
-      console.log(res.data);
-
-      // Hydrate store with user data
-      setUser(res.data.data);
+      const res = await authApi.login(data);
+      setUser(res.data);
       navigate("/dashboard");
     } catch (err) {
-      console.log("error:", err.message);
+      console.error("Login error:", err.response?.data?.message || err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -51,19 +40,12 @@ const LoginPage = () => {
             <input
               {...register("Email", {
                 required: "Email is required",
-                pattern: {
-                  value: /^\S+@\S+$/i,
-                  message: "Enter a valid email",
-                },
+                pattern: { value: /^\S+@\S+$/i, message: "Enter a valid email" },
               })}
-              className="w-full px-4 py-2 bg-gray-800 text-white border border-white/20 rounded-lg focus:outline-none focus:border-white"
               placeholder="Enter your email"
+              className="w-full px-4 py-2 bg-gray-800 text-white border border-white/20 rounded-lg focus:outline-none focus:border-white"
             />
-            {errors.Email && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.Email.message}
-              </p>
-            )}
+            {errors.Email && <p className="text-red-400 text-xs mt-1">{errors.Email.message}</p>}
           </div>
 
           {/* Password */}
@@ -75,22 +57,20 @@ const LoginPage = () => {
                 required: "Password is required",
                 minLength: { value: 6, message: "Minimum 6 characters" },
               })}
-              className="w-full px-4 py-2 bg-gray-800 text-white border border-white/20 rounded-lg focus:outline-none focus:border-white"
               placeholder="••••••••"
+              className="w-full px-4 py-2 bg-gray-800 text-white border border-white/20 rounded-lg focus:outline-none focus:border-white"
             />
-            {errors.Password && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.Password.message}
-              </p>
-            )}
+            {errors.Password && <p className="text-red-400 text-xs mt-1">{errors.Password.message}</p>}
           </div>
 
           {/* Login Button */}
           <button
             type="submit"
-            className="w-full py-2 bg-white text-black font-bold rounded-lg shadow hover:bg-gray-100 transition"
+            disabled={isLoading}
+            className={`w-full py-2 font-bold rounded-lg shadow transition 
+              ${isLoading ? "bg-gray-400 text-gray-200 cursor-not-allowed" : "bg-white text-black hover:bg-gray-100"}`}
           >
-            Login
+            {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
 

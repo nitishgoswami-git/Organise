@@ -32,7 +32,7 @@ const CardSchema = new mongoose.Schema(
     },
     Postion: {
       type: Number,
-      required: true,
+      // required: true,
       default: 1,
     },
     AssignedTo: [

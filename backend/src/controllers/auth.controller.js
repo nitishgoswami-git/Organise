@@ -91,7 +91,7 @@ class AuthController {
   }
 
   static async userData(req, res) {
-    console.log("userData called in auth.controller", req.user._id);
+    // console.log("userData called in auth.controller", req.user._id);
     const userId = req.user._id;
     const userData = await AuthServices.getUserData(userId);
     return res.status(200).json({

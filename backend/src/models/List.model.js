@@ -5,12 +5,17 @@ const ListSchema = new mongoose.Schema(
     Title: {
       type: String,
       required: true,
-      trim: true,
     },
-    Position: {
+    Description:{
+      type:String
+    },
+    PositionX: {
         type: Number,
-        required: true,
-        unique: true,
+        
+    },
+   PositionY: {
+        type: Number,
+        
     },
     BoardId: {
         type: new mongoose.Schema.Types.ObjectId(),

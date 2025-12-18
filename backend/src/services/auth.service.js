@@ -132,7 +132,7 @@ class AuthServices {
   }
 
   static async getUserData(userId) {
-    console.log("getUserData called with userId:", userId);
+    // console.log("getUserData called with userId:", userId);
     const userData = await User.findById(userId).select(
       "-password -refreshToken"
     );
