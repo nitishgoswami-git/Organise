@@ -1,7 +1,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 
-const CreateList = ({ onClose, onCreate }) => {
+const CreateCard = ({ onClose, onCreate, listId }) => {
   const {
     register,
     handleSubmit,
@@ -10,9 +10,10 @@ const CreateList = ({ onClose, onCreate }) => {
   } = useForm();
 
   const onSubmit = (data) => {
-    console.log("List Data:", data);
+    console.log("Card Data:", data);
 
-    onCreate?.(data); 
+    // Pass data with listId to parent
+    onCreate?.({ ...data, listId });
 
     reset();
     onClose?.();
@@ -35,18 +36,18 @@ const CreateList = ({ onClose, onCreate }) => {
     >
       {/* Header */}
       <h1 className="text-lg font-bold mb-4 text-center">
-        CREATE NEW LIST
+        CREATE NEW CARD
       </h1>
 
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* LIst Name */}
+        {/* Card Title */}
         <div>
           <input
             type="text"
-            placeholder="List name"
-            {...register("name", {
-              required: "List name is required",
+            placeholder="Card title"
+            {...register("title", {
+              required: "Card title is required",
               minLength: {
                 value: 3,
                 message: "Minimum 3 characters",
@@ -57,9 +58,9 @@ const CreateList = ({ onClose, onCreate }) => {
               rounded-lg outline-none focus:border-black
             "
           />
-          {errors.name && (
+          {errors.title && (
             <p className="text-red-500 text-xs mt-1">
-              {errors.name.message}
+              {errors.title.message}
             </p>
           )}
         </div>
@@ -77,19 +78,32 @@ const CreateList = ({ onClose, onCreate }) => {
           />
         </div>
 
+        {/* Labels */}
+        <div>
+          <input
+            type="text"
+            placeholder="Labels (optional)"
+            {...register("labels")}
+            className="
+              w-full px-3 py-2 border border-gray-300
+              rounded-lg outline-none focus:border-black
+            "
+          />
+        </div>
+
         {/* Actions */}
         <div className="flex justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 border rounded-lg"
+            className="px-4 py-2 border rounded-lg hover:bg-gray-100"
           >
             Cancel
           </button>
 
           <button
             type="submit"
-            className="px-4 py-2 bg-black text-white rounded-lg"
+            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800"
           >
             Create
           </button>
@@ -99,4 +113,4 @@ const CreateList = ({ onClose, onCreate }) => {
   );
 };
 
-export default CreateList;
+export default CreateCard;

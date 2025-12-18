@@ -1,9 +1,9 @@
-import CardServices from "../services/card.service.js";
+import ListServices from "../services/list.service.js";
 
-class CardController {
-  static async createCard(req, res) {
+class ListController {
+  static async createList(req, res) {
     try {
-      const res_obj = await CardServices.createCard(req.body);
+      const res_obj = await ListServices.createList(req.body);
 
       return res.status(201).json({
         success: true,
@@ -18,9 +18,9 @@ class CardController {
     }
   }
 
-  static async getCards(req, res) {
+  static async getLists(req, res) {
     try {
-      const res_obj = await CardServices.getCards(req.query.boardId);
+      const res_obj = await ListServices.getLists(req.query.boardId);
 
       return res.status(200).json({
         success: true,
@@ -36,4 +36,4 @@ class CardController {
   }
 }
 
-export default CardController;
+export default ListController;

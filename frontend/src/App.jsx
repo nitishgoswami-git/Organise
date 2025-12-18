@@ -1,43 +1,57 @@
-import { useAuthStore } from "./store/auth.store"; 
 import { useEffect } from "react";
-import axios from "axios";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
+import { useAuthStore } from "./store/auth.store";
+import { useBoardStore } from "./store/boards.store";
+
+import { authApi } from "./api/auth";
+import { boardApi } from "./api/board";
+
 import ProtectedRoutes from "./routes/ProtectedRoutes";
+
 import Dashboard from "./pages/Dashboard";
 import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
+import BoardPage from "./pages/BoardPage";
 
 function App() {
-  const setUser = useAuthStore((state) => state.setUser);
-  const clearUser = useAuthStore((state) => state.clearUser);
+  const { setUser, clearUser } = useAuthStore();
+  const { setBoards, clearBoards } = useBoardStore();
+
   useEffect(() => {
-    const fetchMe = async () => {
+    const hydrateApp = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/api/v1/auth/me", {
-          withCredentials: true, // important to send the cookie
-        });
-        setUser(res.data.data); // hydrate the store
+        // 1 Auth
+        const meRes = await authApi.me();
+        const user = meRes.data;
+        setUser(user);
+
+        // 2 Boards
+        const boardsRes = await boardApi.getMyBoards(user._id);
+        setBoards(boardsRes.data);
       } catch (err) {
-        clearUser(); // user not logged in
+        clearUser();
+        clearBoards();
       }
     };
 
-    fetchMe();
-  }, [setUser, clearUser]);
+    hydrateApp();
+  }, [setUser, clearUser, setBoards, clearBoards]);
 
   return (
     <Router>
       <Routes>
-        {/* Public routes */}
+        {/* Public */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
-        {/* Protected routes */}
+        {/* Protected */}
         <Route element={<ProtectedRoutes />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/boards/:id" element={<BoardPage />} />
         </Route>
 
-        {/* Catch-all redirect */}
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>

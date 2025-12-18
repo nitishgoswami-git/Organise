@@ -1,7 +1,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 
-const CreateList = ({ onClose, onCreate }) => {
+const CreateBoard = ({ onClose, onCreate }) => {
   const {
     register,
     handleSubmit,
@@ -10,7 +10,7 @@ const CreateList = ({ onClose, onCreate }) => {
   } = useForm();
 
   const onSubmit = (data) => {
-    console.log("List Data:", data);
+    console.log("Board Data:", data);
 
     onCreate?.(data); 
 
@@ -35,18 +35,18 @@ const CreateList = ({ onClose, onCreate }) => {
     >
       {/* Header */}
       <h1 className="text-lg font-bold mb-4 text-center">
-        CREATE NEW LIST
+        CREATE NEW BOARD
       </h1>
 
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* LIst Name */}
+        {/* Board Name */}
         <div>
           <input
             type="text"
-            placeholder="List name"
+            placeholder="Board name"
             {...register("name", {
-              required: "List name is required",
+              required: "Board name is required",
               minLength: {
                 value: 3,
                 message: "Minimum 3 characters",
@@ -99,4 +99,4 @@ const CreateList = ({ onClose, onCreate }) => {
   );
 };
 
-export default CreateList;
+export default CreateBoard;

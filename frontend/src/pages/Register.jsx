@@ -1,8 +1,8 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import axios from "axios";
-import { useAuthStore } from "../store/auth.store";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/auth.store";
+import { authApi } from "../api/auth/index"; // use your API folder
 
 const RegisterPage = () => {
   const { setUser } = useAuthStore();
@@ -20,26 +20,13 @@ const RegisterPage = () => {
       formData.append("LastName", data.LastName);
       formData.append("Email", data.Email);
       formData.append("Password", data.Password);
-      formData.append("photo", data.photo[0]); // 👈 important
+      formData.append("photo", data.photo[0]);
 
-      const res = await axios.post(
-        "http://localhost:8000/api/v1/auth/register",
-        formData,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      console.log(res.data);
-
-      // Hydrate store with user data
-      setUser(res.data.data);
+      const res = await authApi.register(formData); // API call
+      setUser(res.data); // update Zustand store
       navigate("/dashboard");
     } catch (err) {
-      console.log(err.response?.data || err.message);
+      console.log("Registration error:", err.response?.data || err.message);
     }
   };
 
@@ -49,23 +36,18 @@ const RegisterPage = () => {
         <h1 className="text-3xl font-bold text-center mb-8">Register</h1>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* First Name */}
           <InputField
             label="First Name"
             placeholder="Enter first name"
             {...register("FirstName", { required: "First name is required" })}
             error={errors.FirstName}
           />
-
-          {/* Last Name */}
           <InputField
             label="Last Name"
             placeholder="Enter last name"
             {...register("LastName", { required: "Last name is required" })}
             error={errors.LastName}
           />
-
-          {/* Email */}
           <InputField
             label="Email"
             placeholder="Enter your email"
@@ -75,8 +57,6 @@ const RegisterPage = () => {
             })}
             error={errors.Email}
           />
-
-          {/* Password */}
           <InputField
             type="password"
             label="Password"
@@ -88,11 +68,8 @@ const RegisterPage = () => {
             error={errors.Password}
           />
 
-          {/* Photo */}
           <div>
-            <label className="block mb-2 text-sm font-semibold">
-              Profile Photo
-            </label>
+            <label className="block mb-2 text-sm font-semibold">Profile Photo</label>
             <input
               type="file"
               accept="image/*"
@@ -104,14 +81,9 @@ const RegisterPage = () => {
                          file:bg-white file:text-black
                          hover:file:bg-gray-200"
             />
-            {errors.photo && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.photo.message}
-              </p>
-            )}
+            {errors.photo && <p className="text-red-400 text-xs mt-1">{errors.photo.message}</p>}
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             className="w-full py-2 bg-white text-black font-bold rounded-lg shadow hover:bg-gray-100 transition"
@@ -131,7 +103,6 @@ const RegisterPage = () => {
   );
 };
 
-// Reusable InputField component
 const InputField = ({ label, error, ...rest }) => (
   <div>
     <label className="block mb-2 text-sm font-semibold">{label}</label>
