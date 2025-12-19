@@ -4,12 +4,9 @@ import { verifyUser } from "../../middlewares/auth.middleware.js";
 
 const listRouter = Router();
 
-listRouter.post('/create',verifyUser,ListController.createList)
-listRouter.get('/board-lists',verifyUser,ListController.getLists)
-// ListRouter.put('/update/:ListId',verifyUser,ListController.updateBoard)
-// ListRouter.delete('/delete/:ListId',verifyUser,ListController.deleteBoard)
-// ListRouter.post('/collaborators/:boardId',verifyUser,ListController.addCollaborations)
-// ListRouter.delete('/collaborators/:boardId',verifyUser,ListController.removeCollaboartions)
-// // authRouter.post("/refresh", AuthController.refreshToken);
+listRouter.post("/create", verifyUser, ListController.createList);
+listRouter.get("/board-lists", verifyUser, ListController.getLists);
+
+listRouter.delete("/delete/:listId", verifyUser, ListController.deleteList);
 
 export default listRouter;

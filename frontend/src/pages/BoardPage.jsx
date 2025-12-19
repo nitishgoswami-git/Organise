@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 // import socket from "../socket";
 
 import SideBar from "../components/SideBar/SideBar";
-import List from "../components/List";
+import List from "../components/List/List";
 
 import { useBoardStore } from "../store/boards.store";
 import { useListStore } from "../store/lists.store";

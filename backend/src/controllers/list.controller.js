@@ -34,6 +34,25 @@ class ListController {
       });
     }
   }
+
+  
+  static async deleteList(req, res) {
+    try {
+      const { listId } = req.params;
+
+      const res_obj = await ListServices.deleteList(listId);
+
+      return res.status(200).json({
+        success: true,
+        message: res_obj.msg,
+      });
+    } catch (err) {
+      return res.status(err.statusCode || 400).json({
+        success: false,
+        message: err.message,
+      });
+    }
+  }
 }
 
 export default ListController;

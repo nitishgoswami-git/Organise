@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Trash, ChevronUp, ChevronDown } from "lucide-react";
-import Card from "./Card/Card";
-import CreateCard from "./Card/CreateCard";
-import { useListStore } from "../store/lists.store";
-import { useCardStore } from "../store/cards.store";
-import { cardApi } from "../api/card";
+import Card from "../Card/Card";
+import CreateCard from "../Card/CreateCard";
+import DeleteList from "./DeleteList";
+import { useListStore } from "../../store/lists.store";
+import { useCardStore } from "../../store/cards.store";
+import { cardApi } from "../../api/card";
 
 const List = ({ boardId }) => {
   const { lists } = useListStore();
@@ -12,14 +13,18 @@ const List = ({ boardId }) => {
 
   const [openListIds, setOpenListIds] = useState({});
   const [loading, setLoading] = useState(false);
+
   const [showCreateCard, setShowCreateCard] = useState(false);
   const [selectedListId, setSelectedListId] = useState(null);
 
+  const [showDeleteList, setShowDeleteList] = useState(false);
+  const [selectedList, setSelectedList] = useState(null);
+
   const boardLists = lists.filter((l) => l.BoardId === boardId);
 
-  /* ======================
+  /* 
      FETCH ALL CARDS
-     ====================== */
+     */
   useEffect(() => {
     const fetchAllCards = async () => {
       if (!boardLists.length) return;
@@ -42,9 +47,9 @@ const List = ({ boardId }) => {
     fetchAllCards();
   }, [boardLists.length, setCards]);
 
-  /* ======================
+  /*
      CREATE CARD
-     ====================== */
+      */
   const handleCreateCard = async (data) => {
     try {
       const res = await cardApi.createCard({
@@ -60,6 +65,9 @@ const List = ({ boardId }) => {
     }
   };
 
+  /*
+     HELPERS
+     */
   const toggleListBody = (id) => {
     setOpenListIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
@@ -74,12 +82,25 @@ const List = ({ boardId }) => {
     setSelectedListId(null);
   };
 
+  const openDeleteListPopup = (list) => {
+    setSelectedList(list);
+    setShowDeleteList(true);
+  };
+
+  const closeDeleteListPopup = () => {
+    setShowDeleteList(false);
+    setSelectedList(null);
+  };
+
   if (!boardLists.length) {
     return <div className="p-4 text-gray-500">No lists yet</div>;
   }
 
   return (
     <>
+      {/*
+          CREATE CARD MODAL
+        */}
       {showCreateCard && (
         <>
           <div
@@ -90,6 +111,22 @@ const List = ({ boardId }) => {
             onClose={closeCreateCardPopup}
             onCreate={handleCreateCard}
             listId={selectedListId}
+          />
+        </>
+      )}
+
+      {/* 
+          DELETE LIST MODAL
+         */}
+      {showDeleteList && selectedList && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/40 z-40"
+            onClick={closeDeleteListPopup}
+          />
+          <DeleteList
+            list={selectedList}
+            onClose={closeDeleteListPopup}
           />
         </>
       )}
@@ -118,11 +155,14 @@ const List = ({ boardId }) => {
                     onClick={() => openCreateCardPopup(list._id)}
                     className="cursor-pointer hover:scale-110"
                   />
+
                   <Trash
                     size={18}
                     color="#FF1E56"
+                    onClick={() => openDeleteListPopup(list)}
                     className="cursor-pointer hover:scale-110"
                   />
+
                   {isOpen ? (
                     <ChevronUp
                       onClick={() => toggleListBody(list._id)}
@@ -156,6 +196,7 @@ const List = ({ boardId }) => {
                 </>
               )}
 
+              {/* BOTTOM DOT */}
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-black rounded-full w-6 h-6" />
             </div>
           );
