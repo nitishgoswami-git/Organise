@@ -11,10 +11,12 @@ export const cardApi = {
   },
 
   getCards: async (listId) => {
-    const res = await api.get("/cards/list-cards", {
-      params: { listId },
-    });
-    return res.data;
+    const res = await api.get("/cards/list-cards", { params: { listId } });
+    // Ensure `data` is always an array
+    return {
+      ...res.data,
+      data: Array.isArray(res.data.data) ? res.data.data : [],
+    };
   },
 
   updateCard: async (cardId, data) => {
