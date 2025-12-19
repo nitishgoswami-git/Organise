@@ -1,5 +1,7 @@
+import mongoose from "mongoose";
 import { ApiError } from "../utils/ApiError.js";
 import List from "../models/List.model.js";
+import Card from "../models/Card.model.js";
 
 class ListServices {
   static async createList(body) {
@@ -40,6 +42,41 @@ class ListServices {
       throw new ApiError(500, err.message);
     }
   }
+
+ static async deleteList(listId) {
+    if (!listId) {
+      throw new ApiError(400, "ListId is required");
+    }
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const list = await List.findByIdAndDelete(listId, { session });
+
+      if (!list) {
+        throw new ApiError(404, "List not found");
+      }
+
+      //DELETE ALL CARDS IN THIS LIST
+      await Card.deleteMany(
+        { ListId: listId },
+        { session }
+      );
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return {
+        msg: "List and cards deleted successfully",
+      };
+    } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+
+      throw new ApiError(err.statusCode || 500, err.message);
+    }
+}
 }
 
 export default ListServices;

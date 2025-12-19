@@ -16,4 +16,10 @@ export const listApi = {
     });
     return res.data;
   },
+
+  // DELETE LIST
+  deleteList: async (listId) => {
+    const res = await api.delete(`/lists/delete/${listId}`);
+    return res.data;
+  },
 };

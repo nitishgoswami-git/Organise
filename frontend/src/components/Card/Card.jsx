@@ -12,9 +12,9 @@ const Card = ({ card }) => {
 
   const toggleBody = () => setOpen((p) => !p);
 
-  /* ======================
+  /* 
      UPDATE CARD
-     ====================== */
+    */
   const handleUpdate = async (updatedData) => {
     const optimistic = { ...card, ...updatedData };
 
@@ -30,9 +30,9 @@ const Card = ({ card }) => {
     }
   };
 
-  /* ======================
+  /* 
      DELETE CARD
-     ====================== */
+     */
   const handleDelete = async () => {
     deleteCard(card._id);
 
